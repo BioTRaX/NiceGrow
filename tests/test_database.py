@@ -212,7 +212,7 @@ def test_cliente_destinatarios():
 
 def test_crear_tarea_y_relacion():
     s = bd.crear_servicio(nombre="Srv", cliente="Cli")
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 1, 8),
         datetime(2024, 1, 1, 10),
         "Mantenimiento",
@@ -232,7 +232,7 @@ def test_carrier_asociaciones():
         s.refresh(car)
 
     srv = bd.crear_servicio(nombre="SrvC", cliente="CliC", carrier_id=car.id)
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 3, 8),
         datetime(2024, 1, 3, 10),
         "Mant",
@@ -275,7 +275,7 @@ def test_ensure_servicio_columns_indice_tarea_programada():
 def test_tarea_servicio_unica():
     """La relación tarea-servicio no debe duplicarse (restricción única)."""
     s = bd.crear_servicio(nombre="SrvU", cliente="CliU")
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 2, 8),
         datetime(2024, 1, 2, 10),
         "Mantenimiento",
@@ -292,7 +292,7 @@ def test_tarea_servicio_unica():
 def test_crear_tarea_varios_servicios():
     s1 = bd.crear_servicio(nombre="Sv1", cliente="C1")
     s2 = bd.crear_servicio(nombre="Sv2", cliente="C2")
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 3, 8),
         datetime(2024, 1, 3, 10),
         "Mantenimiento",
@@ -312,7 +312,7 @@ def test_crear_tarea_servicio_repetido():
     """Ignora servicios repetidos al crear la tarea."""
     s = bd.crear_servicio(nombre="SvRep", cliente="CliR")
 
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 4, 8),
         datetime(2024, 1, 4, 10),
         "Mantenimiento",
@@ -416,13 +416,15 @@ def test_eliminar_duplicados_tareas():
             )
         )
 
-
     bd.ensure_servicio_columns()
 
     with bd.SessionLocal() as s:
         filas = (
             s.query(bd.TareaProgramada)
-            .filter(bd.TareaProgramada.carrier_id == 1, bd.TareaProgramada.id_interno == "X1")
+            .filter(
+                bd.TareaProgramada.carrier_id == 1,
+                bd.TareaProgramada.id_interno == "X1",
+            )
             .all()
         )
         pendiente = s.query(bd.ServicioPendiente).first()

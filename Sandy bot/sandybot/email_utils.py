@@ -438,13 +438,13 @@ async def procesar_correo_a_tarea(
     *,
     generar_msg: bool = False,
 ) -> (
-    tuple[TareaProgramada, list[str]]
-    | tuple[TareaProgramada, Cliente, Path, str, list[str]]
+    tuple[TareaProgramada, bool, list[str]]
+    | tuple[TareaProgramada, bool, Cliente, Path, str, list[str]]
 ):
     """Analiza el correo y registra la tarea programada.
 
     Si ``generar_msg`` es ``True`` también se crea un archivo ``.MSG``. El
-    retorno incluye la tarea creada y los IDs pendientes.
+    retorno incluye la tarea, un flag ``creada_nueva`` y los IDs pendientes.
     """
 
     texto_limpio = _limpiar_correo(texto)
@@ -639,7 +639,7 @@ async def procesar_correo_a_tarea(
         if ids_pendientes:
             logger.info(">> Servicios faltantes: %s", ids_pendientes)
 
-        tarea = crear_tarea_programada(
+        tarea, creada_nueva = crear_tarea_programada(
             inicio,
             fin,
             tipo,
@@ -673,9 +673,9 @@ async def procesar_correo_a_tarea(
             )
             ruta_msg = Path(ruta_str)
 
-            return tarea, cliente, ruta_msg, cuerpo, ids_pendientes
+            return tarea, creada_nueva, cliente, ruta_msg, cuerpo, ids_pendientes
 
-        return tarea, ids_pendientes
+        return tarea, creada_nueva, ids_pendientes
 
 
 def _extraer_por_regex(texto: str) -> dict | None:

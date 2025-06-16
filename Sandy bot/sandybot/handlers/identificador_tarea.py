@@ -76,7 +76,7 @@ async def procesar_identificador_tarea(
             os.remove(ruta)
             return
 
-        tarea, ids_pendientes = await procesar_correo_a_tarea(
+        tarea, creada_nueva, ids_pendientes = await procesar_correo_a_tarea(
             contenido, cliente, carrier, generar_msg=False
         )
     except ValueError as exc:
@@ -108,7 +108,7 @@ async def procesar_identificador_tarea(
     carrier_nombre = "Sin carrier"
     servicios_txt = ""
     if tarea.carrier_id:
-        from ..database import Carrier, SessionLocal, TareaServicio
+        from ..database import Carrier, Servicio, SessionLocal, TareaServicio
 
         with SessionLocal() as s:
             car = s.get(Carrier, tarea.carrier_id)
@@ -129,8 +129,14 @@ async def procesar_identificador_tarea(
                     servicios_pares.append(f"{propio} , {car}")
             servicios_txt = "; ".join(servicios_pares)
 
-    detalle = (
-        f"✅ *Tarea Registrada ID: {tarea.id}*\n"
+    if creada_nueva:
+        detalle = f"✅ *Tarea Registrada ID: {tarea.id}*\n"
+    else:
+        interno = tarea.id_interno or "N/D"
+        detalle = f"🔄 La tarea {interno} ya estaba registrada (ID BD: {tarea.id})\n"
+
+    detalle += (
+        f"ID Carrier: {tarea.id_interno or 'N/D'}\n"
         f"• Carrier: {carrier_nombre}\n"
         f"• Tipo   : {tarea.tipo_tarea}\n"
         f"• Inicio : {tarea.fecha_inicio} UTC-3\n"

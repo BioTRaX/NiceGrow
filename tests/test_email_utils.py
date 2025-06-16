@@ -170,6 +170,7 @@ def test_procesar_correo_fecha_dia_mes(tmp_path):
     bd.crear_servicio(nombre="Srv1", cliente="Cli", id_servicio=1)
     (
         tarea,
+        _creada,
         _,
         ruta,
         _,
@@ -234,7 +235,7 @@ def test_generar_archivo_msg(tmp_path):
     srv = bd.crear_servicio(
         nombre="S1", cliente="AcmeWin", cliente_id=cli.id, carrier_id=carrier.id
     )
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 2, 8),
         datetime(2024, 1, 2, 10),
         "Mantenimiento",
@@ -276,7 +277,7 @@ def test_generar_archivo_msg_con_template(tmp_path, monkeypatch):
         s.refresh(cli)
 
     srv = bd.crear_servicio(nombre="S1", cliente="AcmeT", cliente_id=cli.id)
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 2, 8),
         datetime(2024, 1, 2, 10),
         "Mantenimiento",
@@ -352,7 +353,7 @@ def test_generar_archivo_msg_win32(tmp_path, monkeypatch):
     srv = bd.crear_servicio(
         nombre="S1", cliente="AcmeWin2", cliente_id=cli.id, carrier_id=carrier.id
     )
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 2, 8),
         datetime(2024, 1, 2, 10),
         "Mantenimiento",
@@ -428,7 +429,7 @@ def test_generar_archivo_msg_win32_template(tmp_path, monkeypatch):
         s.refresh(cli)
 
     srv = bd.crear_servicio(nombre="S1", cliente="AcmePlant", cliente_id=cli.id)
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 2, 8),
         datetime(2024, 1, 2, 10),
         "Mant",
@@ -465,7 +466,7 @@ def test_procesar_correo_sin_servicios(monkeypatch, caplog):
 
     email_utils.gpt = GPTStub()
 
-    tarea, ids_pend = asyncio.run(
+    tarea, _creada, ids_pend = asyncio.run(
         email_utils.procesar_correo_a_tarea("correo", "Cli", generar_msg=False)
     )
     with bd.SessionLocal() as s:
@@ -495,6 +496,7 @@ def test_procesar_correo_respuesta_con_texto(monkeypatch):
 
     (
         tarea,
+        _creada,
         _,
         _,
         _,
@@ -526,6 +528,7 @@ def test_procesar_correo_id_con_prefijo(monkeypatch):
 
     (
         tarea,
+        _creada,
         _,
         _,
         _,

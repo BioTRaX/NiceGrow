@@ -1,14 +1,15 @@
 # Nombre de archivo: test_tarea_programada.py
 # Ubicación de archivo: tests/test_tarea_programada.py
 # User-provided custom instructions
-import sys
-import importlib
 import asyncio
-from types import ModuleType, SimpleNamespace
-from pathlib import Path
-from datetime import datetime
-from sqlalchemy.orm import sessionmaker
+import importlib
+import sys
 import tempfile
+from datetime import datetime
+from pathlib import Path
+from types import ModuleType, SimpleNamespace
+
+from sqlalchemy.orm import sessionmaker
 
 # Preparar ruta del paquete
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -143,6 +144,7 @@ def test_registrar_tarea_programada(tmp_path):
     assert enviados["cid"] == cli.id
     assert "Mantenimiento" in enviados["cuerpo"]
 
+
 def test_reenviar_aviso(tmp_path):
     global TEMP_DIR
     TEMP_DIR = tmp_path
@@ -180,7 +182,7 @@ def test_reenviar_aviso(tmp_path):
         s.refresh(cli)
 
     servicio = bd.crear_servicio(nombre="Srv", cliente="Cli2", cliente_id=cli.id)
-    tarea = bd.crear_tarea_programada(
+    tarea, _ = bd.crear_tarea_programada(
         datetime(2024, 1, 2, 8),
         datetime(2024, 1, 2, 10),
         "Mantenimiento",

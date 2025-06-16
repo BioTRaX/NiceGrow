@@ -91,6 +91,7 @@ async def detectar_tarea_mail(
     try:
         (
             tarea,
+            creada_nueva,
             cliente,
             ruta,
             _,
@@ -126,10 +127,17 @@ async def detectar_tarea_mail(
         with open(ruta, "rb") as f:
             await mensaje.reply_document(f, filename=ruta.name)
 
+    detalle = (
+        f"✅ Tarea {tarea.id} registrada."
+        if creada_nueva
+        else f"🔄 La tarea {tarea.id_interno or 'N/D'} ya existía (ID BD: {tarea.id})."
+    )
+    if tarea.id_interno:
+        detalle += f"\nID Carrier: {tarea.id_interno}"
     await responder_registrando(
         mensaje,
         user_id,
         mensaje.text or getattr(mensaje.document, "file_name", ""),
-        f"Tarea {tarea.id} registrada.",
+        detalle,
         "tareas",
     )

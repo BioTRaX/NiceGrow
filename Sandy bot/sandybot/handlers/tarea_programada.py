@@ -1,24 +1,25 @@
 # Nombre de archivo: tarea_programada.py
 # Ubicación de archivo: Sandy bot/sandybot/handlers/tarea_programada.py
 # User-provided custom instructions
-from datetime import datetime
-import tempfile
 import os
+import tempfile
+from datetime import datetime
 from pathlib import Path
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from ..utils import obtener_mensaje
-from ..registrador import responder_registrando
 from ..database import (
-    crear_tarea_programada,
-    obtener_cliente_por_nombre,
+    Carrier,
     Cliente,
     Servicio,
-    Carrier,
     SessionLocal,
+    crear_tarea_programada,
+    obtener_cliente_por_nombre,
 )
-from ..email_utils import generar_archivo_msg, enviar_correo
+from ..email_utils import enviar_correo, generar_archivo_msg
+from ..registrador import responder_registrando
+from ..utils import obtener_mensaje
 
 
 async def registrar_tarea_programada(
@@ -76,7 +77,7 @@ async def registrar_tarea_programada(
                 session.commit()
                 session.refresh(carrier)
 
-        tarea = crear_tarea_programada(
+        tarea, creada_nueva = crear_tarea_programada(
             fecha_inicio,
             fecha_fin,
             tipo_tarea,
@@ -113,10 +114,17 @@ async def registrar_tarea_programada(
                 await mensaje.reply_document(f, filename=nombre_arch)
             os.remove(ruta_path)
 
+    detalle = (
+        f"✅ Tarea {tarea.id} registrada."
+        if creada_nueva
+        else f"🔄 La tarea {tarea.id_interno or 'N/D'} ya existía (ID BD: {tarea.id})."
+    )
+    if tarea.id_interno:
+        detalle += f"\nID Carrier: {tarea.id_interno}"
     await responder_registrando(
         mensaje,
         user_id,
         mensaje.text or "registrar_tarea_programada",
-        f"Tarea {tarea.id} registrada.",
+        detalle,
         "tareas",
     )

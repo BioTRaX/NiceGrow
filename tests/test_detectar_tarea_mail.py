@@ -153,7 +153,14 @@ def test_cuerpo_sin_carrier(tmp_path):
         capturado["texto"] = texto
         ruta = tmp_path / "dummy.msg"
         ruta.write_text("x")
-        return SimpleNamespace(id=1), SimpleNamespace(nombre=cliente), ruta, "ok"
+        return (
+            SimpleNamespace(id=1, id_interno="ID001"),
+            True,
+            SimpleNamespace(nombre=cliente),
+            ruta,
+            "ok",
+            [],
+        )
 
     email_utils.procesar_correo_a_tarea = stub_procesar
     tarea_mod.procesar_correo_a_tarea = stub_procesar

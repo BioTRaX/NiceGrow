@@ -139,6 +139,7 @@ async def procesar_correos(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             # Procesar correo → registrar tarea → generar .msg final
             (
                 tarea,
+                _creada_nueva,
                 cliente,
                 ruta_msg,
                 cuerpo,

@@ -6,18 +6,15 @@ import logging
 from datetime import datetime
 
 import pandas as pd
-
 from sqlalchemy import (  # (+) Necesario para definir y recrear índices de forma explícita; (+) Mantiene la restricción única de tareas_servicio
-
-    Index,
-    UniqueConstraint,
     JSON,
     Column,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
-
+    UniqueConstraint,
     create_engine,
     func,
     inspect,
@@ -201,7 +198,6 @@ class TareaProgramada(Base):
     )
 
 
-
 Index(
     "ix_tareas_programadas_fecha_inicio_fecha_fin",
     TareaProgramada.fecha_inicio,
@@ -284,7 +280,6 @@ def eliminar_duplicados_tareas(conn) -> None:
                 text("DELETE FROM tareas_programadas WHERE id = :d"),
                 {"d": dup_id},
             )
-
 
 
 def ensure_servicio_columns() -> None:
@@ -397,7 +392,6 @@ def ensure_servicio_columns() -> None:
                 )
             )
 
-
     uniques_tarea = {
         u["name"] for u in inspector.get_unique_constraints("tareas_programadas")
     }
@@ -409,7 +403,6 @@ def ensure_servicio_columns() -> None:
                     "ALTER TABLE tareas_programadas ADD CONSTRAINT uix_carrier_interno UNIQUE (carrier_id, id_interno)"
                 )
             )
-
 
     if "servicios_pendientes" not in inspector.get_table_names():
         ServicioPendiente.__table__.create(bind=engine)
@@ -826,11 +819,16 @@ def crear_tarea_programada(
     tiempo_afectacion: str | None = None,
     descripcion: str | None = None,
     id_interno: str | None = None,
-) -> TareaProgramada:
-    """Registra una tarea programada y la vincula a los servicios indicados."""
+) -> tuple[TareaProgramada, bool]:
+    """Registra una tarea programada y la vincula a los servicios indicados.
+
+    Retorna la instancia creada o actualizada y ``True`` si se creó una nueva
+    fila en la base.
+    """
 
     with SessionLocal() as session:
         tarea = None
+        creada = False
         if carrier_id and id_interno:
             tarea = (
                 session.query(TareaProgramada)
@@ -857,6 +855,7 @@ def crear_tarea_programada(
                 id_interno=id_interno,
             )
             session.add(tarea)
+            creada = True
 
         session.commit()
         session.refresh(tarea)
@@ -868,7 +867,7 @@ def crear_tarea_programada(
         ]
         session.bulk_save_objects(relaciones)
         session.commit()
-        return tarea
+        return tarea, creada
 
 
 def crear_servicio_pendiente(id_carrier: str, tarea_id: int) -> ServicioPendiente:
